@@ -2,122 +2,152 @@
 //     block: number
 // };
 //
-// let treeExtPack = new WeakMap()
 //
 // ///////////////////////////
 
-type Key = number;
+// Tree Config
+
+type TreeConfig = { blockCursor: 0 };
+
+// Tree Package
+
+type TreeExt = any;
+
+let createPackage = function (): TreeExt {
+    return {};
+}
+
+// B Tree
+
+type DataPackage = { indexed: number };
 
 type TreeNode = {
-    number: number,
-    key: Key[],
-    container: TreeNode[],
-    leaf: boolean
+    size: number,
+    data: DataPackage[],
+    children: TreeNode[],
+    leaf: boolean,
+    config: TreeConfig,
+    pack: TreeExt
 }
 
 type TreeRoot = { root: TreeNode };
 
-let volume: number = 1000;
+let volume: number = 3;
 
-export let create = function (): TreeRoot {
-    return {root: createNode()} as TreeRoot;
+let create = function (): TreeRoot {
+    return {root: createNode({ blockCursor: 0 } as TreeConfig) } as TreeRoot;
 }
 
-let createNode = function (): TreeNode {
-    return {
-        number: 0,
-        key: [],
-        container: [],
-        leaf: true
+let createNode = function (config: TreeConfig, ext?: TreeExt): TreeNode {
+    let node = {
+        size: 0,
+        data: [],
+        children: [],
+        leaf: true,
+        config: config,
+        pack: { ...ext, block: config.blockCursor }
     }
+    config.blockCursor++;
+    return node;
 }
 
-export let insert = function (treeRoot: TreeRoot, key: Key) {
+let insertRaw = function (treeRoot: TreeRoot, key: DataPackage) {
     let root = treeRoot.root;
-    if (root.number == 2 * volume - 1) {
-        let node = createNode();
+    if (root.size == 2 * volume - 1) {
+        let node = createNode(root.config);
         treeRoot.root = node;
         node.leaf = false;
-        node.number = 0;
-        node.container[0] = root;
+        node.size = 0;
+        node.children[0] = root;
         split(node, 0);
-        insertNotFull(node, key)
+        insertNotFull(node, key);
     } else {
-        insertNotFull(root, key)
+        insertNotFull(root, key);
     }
 }
 
-let insertNotFull = function (target: TreeNode, key: Key) {
+let insertNotFull = function (target: TreeNode, key: DataPackage) {
     if (target.leaf) {
         let insert = false;
-        for (let i2 = 0; i2 < target.number; i2++) if (key <= target.key[i2]) {
-            target.key.splice(i2, 0, key);
+        for (let i = 0; i < target.size; i++) if (key.indexed <= target.data[i].indexed) {
+            target.data.splice(i, 0, key);
             insert = true;
             break;
         }
-        if (!insert) target.key.push(key);
-        target.number = target.number + 1;
+        if (!insert) target.data.push(key);
+        target.size = target.size + 1;
     } else {
-        let cursor = target.key.length;
-        for (let i = target.key.length; i >= 0; i--) {
-            if (key >= target.key[i]) {
+        let cursor = target.data.length;
+        for (let i = target.data.length; i >= 0; i--) {
+            if (target.data[i] && key.indexed >= target.data[i].indexed) {
                 cursor = i + 1;
                 break;
             }
         }
-        if (target.container[cursor].number == 2 * volume - 1) {
+        if (target.children[cursor].size == 2 * volume - 1) {
             split(target, cursor);
-            if (key > target.key[cursor]) {
+            if (key.indexed > target.data[cursor].indexed) {
                 cursor = cursor + 1;
             }
         }
-        insertNotFull(target.container[cursor], key);
+        insertNotFull(target.children[cursor], key);
     }
 }
 
 let split = function (target: TreeNode, i: number) {
-    let rn = createNode();
-    let ln = target.container[i];
+    let rn = createNode(target.config);
+    let ln = target.children[i];
     rn.leaf = ln.leaf;
-    rn.number = volume - 1;
+    rn.size = volume - 1;
 
-    rn.key = ln.key.slice(0, volume - 1);
-    ln.key = ln.key.slice(volume - 1, ln.key.length);
+    rn.data = ln.data.slice(0, volume - 1);
+    ln.data = ln.data.slice(volume - 1, ln.data.length);
     if (!ln.leaf) {
-        rn.container = ln.container.slice(0, volume);
-        ln.container = ln.container.slice(volume, ln.container.length);
+        rn.children = ln.children.slice(0, volume);
+        ln.children = ln.children.slice(volume, ln.children.length);
     }
-    ln.number = volume - 1;
-    for (let j = target.number + 1; j > i + 1; j--) {
-        target.key[j + 1] = target.key[j];
+    ln.size = volume - 1;
+    for (let j = target.size + 1; j > i + 1; j--) {
+        target.data[j + 1] = target.data[j];
     }
-    target.container.splice(i, 0, rn);
-    for (let j = target.number; j > i; j--) {
-        target.key[j + 1] = target.key[i];
+    target.children.splice(i, 0, rn);
+    for (let j = target.size; j > i; j--) {
+        target.data[j + 1] = target.data[i];
     }
-    target.key[i] = ln.key[0];
-    ln.key.shift();
-    target.number = target.number + 1;
+    target.data[i] = ln.data[0];
+    ln.data.shift();
+    target.size = target.size + 1;
     return false;
 }
 
-export let search = function<T extends Object>(node: T extends TreeRoot ? TreeRoot : TreeNode, key: Key) {
-    let root = node as TreeRoot ? (node as TreeRoot).root : node;
+let search = function<T>(node: any, key: DataPackage) {
+    let root = (node as TreeRoot).root ? (node as TreeRoot).root : node;
     let cursor = 0;
-    while (cursor < root.number && key > root.key[cursor]) {
+    while (cursor < root.size && key.indexed > root.data[cursor].indexed) {
         cursor++;
     }
-    if (cursor <= root.number && key == root.key[cursor]) {
+    if (cursor <= root.size && key.indexed == root.data[cursor].indexed) {
         return root;
     } else if (root.leaf) {
         return undefined;
     } else {
-        return search<TreeNode>(root.container[cursor], key);
+        return search<TreeNode>(root.children[cursor], key);
     }
 }
 
 let tree = create();
-for (let i = 0; i <= 18000; i++) {
-    insert(tree, i);
-}
-console.log(tree);
+
+let arr = [
+    'apple',
+    'bee',
+    '亚洲',
+    '非洲'
+];
+
+arr.forEach((item) => {
+    for (let point of item) {
+        insertRaw(tree, { indexed: point.codePointAt(0) } as DataPackage);
+    }
+});
+
+console.log(tree)
