@@ -1,101 +1,123 @@
-class BPTreeNode {
-    n: number = 0;
-    h: number = 4;
-    key: number[] = [];
-    c: BPTreeNode[] = [];
-    k: any[] = [];
-    leaf: boolean = false;
+// type FilePage = {
+//     block: number
+// };
+//
+// let treeExtPack = new WeakMap()
+//
+// ///////////////////////////
+
+type Key = number;
+
+type TreeNode = {
+    number: number,
+    key: Key[],
+    container: TreeNode[],
+    leaf: boolean
 }
 
-type BTree = {
-    root: BPTreeNode
-};
+type TreeRoot = { root: TreeNode };
 
-let t: number = 3
+let volume: number = 1000;
 
-let BPTreeCreate = function (T: BTree) {
-    let x = new BPTreeNode()
-    x.leaf = true
-    T.root = x
-    return T
+export let create = function (): TreeRoot {
+    return {root: createNode()} as TreeRoot;
 }
 
-
-let BPTreeSplitChild = function (x: BPTreeNode, i: number) {
-    let rightNode = new BPTreeNode()
-    let leftNode = x.c[i]
-    rightNode.leaf = leftNode.leaf
-    rightNode.n = t - 1
-
-    rightNode.key = leftNode.key.slice(0, t - 1)
-    leftNode.key = leftNode.key.slice(t - 1, leftNode.key.length)
-    if (!leftNode.leaf) {
-        for (let j = 0; j < t; j++) {
-            rightNode.c[i] = leftNode.c[j + t]
-        }
+let createNode = function (): TreeNode {
+    return {
+        number: 0,
+        key: [],
+        container: [],
+        leaf: true
     }
-    leftNode.n = t - 1
-    for (let j = x.n + 1; j > i + 1; j--) {
-        x.key[j + 1] = x.key[j]
-    }
-    x.c.splice(i, 0, rightNode)
-    for (let j = x.n; j > i; j--) {
-        x.key[j + 1] = x.key[i]
-    }
-    x.key[i] = leftNode.key[0]
-    leftNode.key.shift()
-    x.n = x.n + 1
-    return false
 }
 
-let BPTreeInsert = function (T: BTree, k) {
-    let r = T.root
-    if (r.n == 2 * t - 1) {
-        let s = new BPTreeNode()
-        T.root = s
-        s.leaf = false
-        s.n = 0
-        s.c[0] = r
-        BPTreeSplitChild(s, 0)
-        BPTreeInsertNonFull(s, k)
+export let insert = function (treeRoot: TreeRoot, key: Key) {
+    let root = treeRoot.root;
+    if (root.number == 2 * volume - 1) {
+        let node = createNode();
+        treeRoot.root = node;
+        node.leaf = false;
+        node.number = 0;
+        node.container[0] = root;
+        split(node, 0);
+        insertNotFull(node, key)
     } else {
-        BPTreeInsertNonFull(r, k)
+        insertNotFull(root, key)
     }
 }
 
-let BPTreeInsertNonFull = function (x: BPTreeNode, k) {
-    let i = x.n
-    if (x.leaf) {
-        let insert = false
-        for (let i2 = 0; i2 < x.n; i2++) if (k <= x.key[i2]) {
-            x.key.splice(i2, 0, k)
-            insert = true
-            break
+let insertNotFull = function (target: TreeNode, key: Key) {
+    if (target.leaf) {
+        let insert = false;
+        for (let i2 = 0; i2 < target.number; i2++) if (key <= target.key[i2]) {
+            target.key.splice(i2, 0, key);
+            insert = true;
+            break;
         }
-        if (!insert) x.key.push(k)
-        x.n = x.n + 1
+        if (!insert) target.key.push(key);
+        target.number = target.number + 1;
     } else {
-        i = 0;
-        for (let i3 = 0; i3 <= x.key.length; i3++) {
-            if (k >= x.key[i3]) {
-                i = i3 + 1;
+        let cursor = target.key.length;
+        for (let i = target.key.length; i >= 0; i--) {
+            if (key >= target.key[i]) {
+                cursor = i + 1;
                 break;
             }
         }
-        if (x.c[i].n == 2 * t - 1) {
-            BPTreeSplitChild(x, i)
-            if (k > x.key[i]) {
-                i = i + 1
+        if (target.container[cursor].number == 2 * volume - 1) {
+            split(target, cursor);
+            if (key > target.key[cursor]) {
+                cursor = cursor + 1;
             }
         }
-        BPTreeInsertNonFull(x.c[i], k)
+        insertNotFull(target.container[cursor], key);
     }
 }
 
-let BTreeObject: BTree = {root: null}
-BPTreeCreate(BTreeObject)
-for (let i = 0; i <= 10; i++) {
-    BPTreeInsert(BTreeObject, i)
+let split = function (target: TreeNode, i: number) {
+    let rn = createNode();
+    let ln = target.container[i];
+    rn.leaf = ln.leaf;
+    rn.number = volume - 1;
+
+    rn.key = ln.key.slice(0, volume - 1);
+    ln.key = ln.key.slice(volume - 1, ln.key.length);
+    if (!ln.leaf) {
+        rn.container = ln.container.slice(0, volume);
+        ln.container = ln.container.slice(volume, ln.container.length);
+    }
+    ln.number = volume - 1;
+    for (let j = target.number + 1; j > i + 1; j--) {
+        target.key[j + 1] = target.key[j];
+    }
+    target.container.splice(i, 0, rn);
+    for (let j = target.number; j > i; j--) {
+        target.key[j + 1] = target.key[i];
+    }
+    target.key[i] = ln.key[0];
+    ln.key.shift();
+    target.number = target.number + 1;
+    return false;
 }
 
-console.log(BTreeObject)
+export let search = function<T extends Object>(node: T extends TreeRoot ? TreeRoot : TreeNode, key: Key) {
+    let root = node as TreeRoot ? (node as TreeRoot).root : node;
+    let cursor = 0;
+    while (cursor < root.number && key > root.key[cursor]) {
+        cursor++;
+    }
+    if (cursor <= root.number && key == root.key[cursor]) {
+        return root;
+    } else if (root.leaf) {
+        return undefined;
+    } else {
+        return search<TreeNode>(root.container[cursor], key);
+    }
+}
+
+let tree = create();
+for (let i = 0; i <= 18000; i++) {
+    insert(tree, i);
+}
+console.log(tree);
