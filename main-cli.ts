@@ -4,28 +4,20 @@ import {cursorTo} from "readline";
 
 async function main() {
 
-  let diskAddress: string[] = [];
-  let endCursor = 255 + 255‬;
-
-  console.log(endCursor);
+  let diskAddress: number[] = [];
+  let endCursor = 100000;
 
   let dataBlock = 0;
   let cursor = endCursor;
   do {
     if (cursor < 256) {
-      let str = '0x';
-      for (let i = 0; i < dataBlock; i++) str += 'FF';
-      str = str + (endCursor % 256).toString('16').toUpperCase().padStart(2, '0');
-      console.log('Resource Address: ', endCursor);
-      console.log('Data Address:', str);
+      diskAddress.push(endCursor % 256);
       break;
     }
     dataBlock++;
     cursor = Math.ceil(cursor / 256);
-    diskAddress.unshift(cursor.toString('16'));
+    diskAddress.push(cursor);
   } while (true);
-
-  console.log(diskAddress);1
 
   process.exit();
 
