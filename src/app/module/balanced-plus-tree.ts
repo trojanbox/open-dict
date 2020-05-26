@@ -1,4 +1,4 @@
-import {PageManagerInterface} from "./page-manager.interface";
+import {PageManagerInterface} from "./page/page-manager.interface";
 
 class BalancedPlusTree
 {
