@@ -4,13 +4,7 @@ import { cursorTo } from "readline";
 
 async function main() {
 
-  let content = Buffer.from('圣诞节分厘卡即使反对离开家');
-  let buffer = Buffer.alloc(4);
-  buffer.writeUInt32BE(content.byteLength, 0);
-  console.log(Buffer.concat([buffer, content]));
-
   return null;
-
 }
 
 main().then(() => {});

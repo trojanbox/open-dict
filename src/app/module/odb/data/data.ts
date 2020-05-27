@@ -14,7 +14,9 @@ export class Data extends DiskSpaceManager {
     let buffer = Buffer.alloc(4);
     let contentBuffer: Buffer = <Buffer> await promisify(zlib.deflate)(Buffer.from(content));
     buffer.writeUInt32BE(contentBuffer.byteLength, 0);
-    return Buffer.concat([buffer, contentBuffer]);
+    let merge = Buffer.concat([buffer, contentBuffer]);
+    this.appendByteLength(merge.byteLength);
+    return merge;
   }
 
   public addFile() {

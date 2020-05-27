@@ -25,7 +25,7 @@ export class UserRecord extends DiskSpaceManager {
    * 如果字符长度不超过 127 比特，则使用 1 字节存储字符长度，否则使用 2 字节存储
    * @param keyword 关键字 最长不可超过 3200bit，超出部分将被截取
    */
-  public setKeyword(keyword: string) {
+  public async setKeyword(keyword: string) {
     this.keyword = Buffer.from(keyword);
     this.keywordLength = this.keyword.byteLength <= (1 << 7) - 1 ? 1 : 2;
     let bufferAlloc = Buffer.alloc(this.keywordLength);
@@ -34,7 +34,9 @@ export class UserRecord extends DiskSpaceManager {
     } else {
       bufferAlloc.writeUInt16BE(this.keyword.byteLength, 0);
     }
-    return Buffer.concat([bufferAlloc, this.keyword]);
+    let merge = Buffer.concat([bufferAlloc, this.keyword]);
+    this.appendByteLength(merge.byteLength);
+    return merge;
   }
 
   /**
@@ -45,13 +47,14 @@ export class UserRecord extends DiskSpaceManager {
    * 例如：地址位数据为 0xFFFFFF06，则真实的寻址为 256^4 + 256^3 + 256^2 + 6
    * @param address 10 进制地址
    */
-  public setDataAddress(address: number) {
+  public async setDataAddress(address: number) {
     const block = address2block(address);
     let buffer = Buffer.alloc(1 + block.length);
     buffer.writeUInt8(block.length, 0);
     for (let i = 0; i < block.length; i++) {
       buffer.writeUInt8(block[i], (i + 1) * 8);
     }
+    this.appendByteLength(buffer.byteLength);
     return buffer;
   }
 
