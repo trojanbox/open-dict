@@ -1,7 +1,7 @@
 import {UserRecord} from "./user-record";
 import {DirRecord} from "./dir-record";
-import {CustomParamSpacePage} from "../struct/custom-param-space.page";
-import {DiskSpaceManager} from "./disk-space-manager";
+import {CustomParamSpacePage} from "../structure/custom-param-space.page";
+import {DiskSpaceManager} from "../disk-space-manager";
 
 export class Page extends DiskSpaceManager {
 

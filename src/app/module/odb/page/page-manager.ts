@@ -1,12 +1,14 @@
-import {Page} from "./page";
+import { Page } from "./page";
+import { DiskSpaceManager } from "../disk-space-manager";
 
-export class PageManager {
-
+export class PageManager extends DiskSpaceManager {
   public pk: number = 0x00000000;
 
   public activePageLength: number = 2000;
 
   public activePageList: Page[] = [];
+
+  public pageSize: number = 2 << 16;
 
   public async addPage(page: Page) {
     page.setPageNo(this.pk++);
@@ -17,7 +19,5 @@ export class PageManager {
     return this;
   }
 
-  public async createPageNode() {
-
-  }
+  public async createPageNode() {}
 }

@@ -1,55 +1,16 @@
 import * as zlib from "zlib";
-import {promisify} from "util";
-import {cursorTo} from "readline";
+import { promisify } from "util";
+import { cursorTo } from "readline";
 
 async function main() {
 
-  let diskAddress: number[] = [];
-  let endCursor = 100000;
+  let content = Buffer.from('圣诞节分厘卡即使反对离开家');
+  let buffer = Buffer.alloc(4);
+  buffer.writeUInt32BE(content.byteLength, 0);
+  console.log(Buffer.concat([buffer, content]));
 
-  let dataBlock = 0;
-  let cursor = endCursor;
-  do {
-    if (cursor < 256) {
-      diskAddress.push(endCursor % 256);
-      break;
-    }
-    dataBlock++;
-    cursor = Math.ceil(cursor / 256);
-    diskAddress.push(cursor);
-  } while (true);
+  return null;
 
-  process.exit();
-
-  //
-  // let endCursor = 255 + 255‬;
-  //
-  // console.log(endCursor);
-  //
-  // let dataBlock = 0;
-  // let cursor = endCursor;
-  // do {
-  //   if (cursor < 256) {
-  //     let str = '0x';
-  //     for (let i = 0; i < dataBlock; i++) str += 'FF';
-  //     str = str + (endCursor % 256).toString('16').toUpperCase().padStart(2, '0');
-  //     console.log('Resource Address: ', endCursor);
-  //     console.log('Data Address:', str);
-  //     break;
-  //   }
-  //   dataBlock++;
-  //   cursor = Math.ceil(cursor / 256);
-  // } while (true);
-  //
-  // process.exit();
-  //
-  // // 关键字二进制文件
-  // let addrOffset = 32;
-  // let content = Buffer.from(addrOffset.toString('16'));
-  // let bufferAlloc = Buffer.alloc(1);
-  // bufferAlloc.writeInt8(content.byteLength, 0);
-  //
-  // console.log(Buffer.concat([bufferAlloc, content]));
 }
 
 main().then(() => {});
