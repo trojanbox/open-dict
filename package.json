@@ -38,7 +38,8 @@
     "e2e": "npm run build:prod && cross-env TS_NODE_PROJECT='e2e/tsconfig.e2e.json' mocha --timeout 300000 --require ts-node/register e2e/**/*.e2e.ts",
     "version": "conventional-changelog -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "lint": "ng lint",
-    "build:main-cli": "tsc -w main-cli.ts"
+    "build:main-cli": "tsc -w main-cli.ts",
+    "build:main-cli:run": "node main-cli.js"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "9.1.0",
@@ -93,5 +94,8 @@
   },
   "engines": {
     "node": ">=10.13.0"
+  },
+  "dependencies": {
+    "capture-electron": "3.0.2"
   }
 }

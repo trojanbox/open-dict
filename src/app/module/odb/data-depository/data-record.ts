@@ -1,8 +1,7 @@
-import { DiskSpaceManager } from "../disk-space-manager";
+import { SpaceManager } from "../disk-manager/space-manager";
 import * as zlib from 'zlib';
-import { promisify } from "util";
 
-export class Data extends DiskSpaceManager {
+export class DataRecord extends SpaceManager {
 
   /**
    * 添加字符串
@@ -10,17 +9,13 @@ export class Data extends DiskSpaceManager {
    * 数据长度固定 4 字节，后面的数据最多可追加 512M
    * @param content
    */
-  public async addString(content: string) {
+  public async writeString(content: string) {
     let buffer = Buffer.alloc(4);
-    let contentBuffer: Buffer = <Buffer> await promisify(zlib.deflate)(Buffer.from(content));
+    let contentBuffer: Buffer = <Buffer> zlib.deflateSync(Buffer.from(content));
     buffer.writeUInt32BE(contentBuffer.byteLength, 0);
     let merge = Buffer.concat([buffer, contentBuffer]);
     this.appendByteLength(merge.byteLength);
     return merge;
-  }
-
-  public addFile() {
-    // TODO 使用文件流追加数据
   }
 
 }

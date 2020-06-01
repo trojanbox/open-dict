@@ -1,19 +1,20 @@
-import {WordSpacePage} from "../structure/word-space.page";
-import {AddressSpacePage} from "../structure/address-space.page";
-import {DiskSpaceManager} from "../disk-space-manager";
+import { WordSpacePage } from "../structure/word-space.page";
+import { AddressSpacePage } from "../structure/address-space.page";
 import { address2block } from "../../utils/disk-address";
+import { SpaceManager } from "../disk-manager/space-manager";
 
-export class UserRecord extends DiskSpaceManager {
-
+export class UserRecord extends SpaceManager {
   protected recordNo: number = 0;
 
   protected wordSpace: WordSpacePage;
 
   protected dataAddress: AddressSpacePage;
 
-  protected keywordLength: number = 1;
-
   protected keyword: Buffer;
+
+  protected keywordBuffer: Buffer;
+
+  protected addressBuffer: Buffer;
 
   constructor() {
     super();
@@ -27,15 +28,11 @@ export class UserRecord extends DiskSpaceManager {
    */
   public async setKeyword(keyword: string) {
     this.keyword = Buffer.from(keyword);
-    this.keywordLength = this.keyword.byteLength <= (1 << 7) - 1 ? 1 : 2;
-    let bufferAlloc = Buffer.alloc(this.keywordLength);
-    if (this.keywordLength === 1) {
-      bufferAlloc.writeUInt8(this.keyword.byteLength, 0);
-    } else {
-      bufferAlloc.writeUInt16BE(this.keyword.byteLength, 0);
-    }
+    let bufferAlloc = Buffer.alloc(2);
+    bufferAlloc.writeUInt16BE(this.keyword.byteLength, 0);
     let merge = Buffer.concat([bufferAlloc, this.keyword]);
     this.appendByteLength(merge.byteLength);
+    this.keywordBuffer = merge;
     return merge;
   }
 
@@ -52,10 +49,14 @@ export class UserRecord extends DiskSpaceManager {
     let buffer = Buffer.alloc(1 + block.length);
     buffer.writeUInt8(block.length, 0);
     for (let i = 0; i < block.length; i++) {
-      buffer.writeUInt8(block[i], (i + 1) * 8);
+      buffer.writeUInt8(block[i], i + 1);
     }
     this.appendByteLength(buffer.byteLength);
+    this.addressBuffer = buffer;
     return buffer;
   }
 
+  public toBuffer() {
+    return Buffer.concat([this.keywordBuffer, this.addressBuffer]);
+  }
 }

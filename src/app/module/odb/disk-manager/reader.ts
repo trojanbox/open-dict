@@ -1,31 +1,40 @@
-import {File, FileReaderItemCallable, Item, ItemRaw, ItemType} from "./file";
+import {
+  File,
+  FileReaderItemCallable,
+  Item,
+  ItemRaw,
+  ItemType,
+} from "./disk-manager";
 import * as fs from "fs";
-import {promisify} from "util";
-import {openSync} from "fs";
-import {qsort} from "./qsort";
+import { promisify } from "util";
 
-export class Reader extends File {
-
-  /**
-   * 512k
-   */
+export class ResourceReader extends File {
   private bufferLength: number = 1 << 23;
 
   private offset: number = 0;
 
-  async getItem(callback: FileReaderItemCallable): Promise<boolean> {
+  write(str) { };
 
+  async getItem(callback: FileReaderItemCallable): Promise<boolean> {
     let position: number = 0;
     let group: number = 0;
     let lastBuffer: Buffer = Buffer.alloc(0);
     let isContinue = true;
 
     while (true) {
-
       let buffer: Buffer = Buffer.alloc(this.bufferLength);
-      let readResult = await promisify(fs.read)(this.handler, buffer, this.offset, this.bufferLength, position);
+      let readResult = await promisify(fs.read)(
+        this.handler,
+        buffer,
+        this.offset,
+        this.bufferLength,
+        position
+      );
       if (readResult.bytesRead <= 0) isContinue = false;
-      let mergeBuffer: Buffer = Buffer.concat([lastBuffer, readResult.buffer.slice(0, readResult.bytesRead)]);
+      let mergeBuffer: Buffer = Buffer.concat([
+        lastBuffer,
+        readResult.buffer.slice(0, readResult.bytesRead),
+      ]);
       let res: ItemRaw[] = await this.encoding(mergeBuffer);
 
       for (let i = 0; i < res.length; i++) {
@@ -57,7 +66,7 @@ export class Reader extends File {
   }
 
   private async encoding(content: Buffer): Promise<ItemRaw[]> {
-    const encodeStr: string = content.toString('utf-8');
+    const encodeStr: string = content.toString("utf-8");
     let items: string[] = encodeStr.split("</>");
     let result: ItemRaw[] = [];
 
@@ -65,27 +74,28 @@ export class Reader extends File {
       let item: string = items[key];
       if (item.length <= 2) continue;
       const raw: string[] = item.split("\n");
-      if (raw[0] == '') raw.shift();
-      const isFragment: boolean = parseInt(key) >= (items.length - 1);
+      if (raw[0] == "") raw.shift();
+      const isFragment: boolean = parseInt(key) >= items.length - 1;
       result.push({
         type: isFragment ? ItemType.FRAGMENT : ItemType.SEGMENT,
         raw: isFragment ? Buffer.from(item) : undefined,
         decode: {
           keyword: raw[0],
-          content: this.getContent(raw)
-        }
+          content: this.getContent(raw),
+        },
       });
-
     }
 
     return result;
   }
 
   private getContent(raw: string[]): string {
-      let content: string = raw.slice(1, raw.length).reduce((p, c) => p + "\n" + c);
-      if (content.substr(content.length - 1, 1) === "\n") {
-        return content.substr(0, content.length - 1);
-      }
-      return content;
+    let content: string = raw
+      .slice(1, raw.length)
+      .reduce((p, c) => p + "\n" + c);
+    if (content.substr(content.length - 1, 1) === "\n") {
+      return content.substr(0, content.length - 1);
+    }
+    return content;
   }
 }

@@ -36,103 +36,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var reader_1 = require("./src/app/module/reader");
-var qsort_1 = require("./src/app/module/qsort");
-var writer_1 = require("./src/app/module/writer");
-var loser_tree_1 = require("./src/app/module/loser-tree");
-var queue_reader_1 = require("./src/app/module/queue-reader");
+var odb_builder_1 = require("./src/app/module/odb/odb-builder");
+var writer_1 = require("./src/app/module/odb/disk-manager/writer");
+var indexed_manager_1 = require("./src/app/module/odb/indexed/indexed-manager");
+var data_depository_manager_1 = require("./src/app/module/odb/data-depository/data-depository-manager");
+var page_manager_1 = require("./src/app/module/odb/indexed/page-manager");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var fileList, reader, totalReaders, _a, _b, _i, i, _c, _d, fileName, writer, lt;
-        var _this = this;
-        return __generator(this, function (_e) {
-            switch (_e.label) {
+        var odbBuilder, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
-                    console.log('start...');
-                    fileList = [];
-                    reader = new reader_1.Reader({ mode: 'r' });
-                    return [4 /*yield*/, reader.open('D:\\test\\dict-source.txt')];
+                    _a.trys.push([0, 2, , 3]);
+                    odbBuilder = new odb_builder_1.OdbBuilder();
+                    return [4 /*yield*/, odbBuilder
+                            .setWriterAdapter(new writer_1.Writer())
+                            .setDataDepositoryAdapter(new data_depository_manager_1.DataDepositoryManager())
+                            .setIndexedAdapter(new indexed_manager_1.IndexedManager().setPageManager(new page_manager_1.PageManager()))
+                            // .setMediaAdapter(adapter)
+                            .setInputFile("D:\\test\\dict-source.txt")
+                            .setOutputFile("D:\\test\\output.dat")
+                            .build()];
                 case 1:
-                    _e.sent();
-                    return [4 /*yield*/, reader.getItemList(function (list) { return __awaiter(_this, void 0, void 0, function () {
-                            var sort, fileName, fileFullName, writer, _i, sort_1, item;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        sort = qsort_1.qsort(list, function (a, b) { return a.keyword < b.keyword; });
-                                        fileName = Math.random() * 1e20;
-                                        fileFullName = 'D:\\test\\temp\\' + fileName + '.tmp';
-                                        writer = new writer_1.Writer({ mode: 'w' });
-                                        fileList.push(fileFullName);
-                                        return [4 /*yield*/, writer.open(fileFullName)];
-                                    case 1:
-                                        _a.sent();
-                                        _i = 0, sort_1 = sort;
-                                        _a.label = 2;
-                                    case 2:
-                                        if (!(_i < sort_1.length)) return [3 /*break*/, 5];
-                                        item = sort_1[_i];
-                                        return [4 /*yield*/, writer.writeLnLazy(JSON.stringify(item))];
-                                    case 3:
-                                        _a.sent();
-                                        _a.label = 4;
-                                    case 4:
-                                        _i++;
-                                        return [3 /*break*/, 2];
-                                    case 5: return [4 /*yield*/, writer.done()];
-                                    case 6:
-                                        _a.sent();
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); }, 10000)];
-                case 2:
-                    _e.sent();
-                    totalReaders = [];
-                    _a = [];
-                    for (_b in fileList)
-                        _a.push(_b);
-                    _i = 0;
-                    _e.label = 3;
-                case 3:
-                    if (!(_i < _a.length)) return [3 /*break*/, 6];
-                    i = _a[_i];
-                    if (!fileList.hasOwnProperty(i)) return [3 /*break*/, 5];
-                    _d = (_c = totalReaders).push;
-                    return [4 /*yield*/, new queue_reader_1.QueueReader({ mode: 'r+' }).open(fileList[i])];
-                case 4:
-                    _d.apply(_c, [_e.sent()]);
-                    _e.label = 5;
-                case 5:
-                    _i++;
+                    _a.sent();
                     return [3 /*break*/, 3];
-                case 6:
-                    fileName = 'merge_file';
-                    writer = new writer_1.Writer({ mode: 'w' });
-                    return [4 /*yield*/, writer.open('D:\\test\\temp\\' + fileName + '.tmp')];
-                case 7:
-                    _e.sent();
-                    return [4 /*yield*/, new loser_tree_1.LoserTree(function (a, b) { return parseInt(a.keyword) > parseInt(b.keyword); })];
-                case 8:
-                    lt = _e.sent();
-                    return [4 /*yield*/, lt.bindDataSource(totalReaders)];
-                case 9:
-                    _e.sent();
-                    return [4 /*yield*/, lt.getItem(function (item) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, writer.writeLnLazy(JSON.stringify(item))];
-                                case 1: return [2 /*return*/, _a.sent()];
-                            }
-                        }); }); })];
-                case 10:
-                    _e.sent();
-                    return [4 /*yield*/, writer.done()];
-                case 11:
-                    _e.sent();
-                    return [2 /*return*/];
+                case 2:
+                    e_1 = _a.sent();
+                    console.log(e_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/, null];
             }
         });
     });
 }
-main().then(function () {
-});
+main().then(function () { });

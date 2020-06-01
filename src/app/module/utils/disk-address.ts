@@ -1,12 +1,13 @@
 /**
  * 将 10 进制地址转换成 8bit 16 进制区块地址
  * @param address 原始地址
- * @param splitBlock 转换后的地址，默认为 十进制 256，十六进制 FF
+ * @param partition 转换后的地址，默认为 十进制 256，十六进制 FF
  */
 export const address2block = (
   address: number = 0,
   partition: number = 1 << 8
 ): number[] => {
+  if (address <= 0) return [0];
   let length = Math.floor(Math.log(address) / Math.log(partition));
   let arr: number[] = [];
   for (let i = length; i >= 0; i--) {

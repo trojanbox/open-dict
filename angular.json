@@ -27,6 +27,15 @@
               "path": "./angular.webpack.js"
             }
           },
+          "extraResources": [
+            {
+              "from": "src/extraResources/",
+              "to": "extraResources",
+              "filter": [
+                "**/*"
+              ]
+            }
+          ],
           "configurations": {
             "dev": {
               "optimization": false,

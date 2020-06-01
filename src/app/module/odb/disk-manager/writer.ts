@@ -1,8 +1,9 @@
-import {File} from "./file";
+import {File} from "./disk-manager";
 import * as fs from "fs";
 import {promisify} from "util";
+import { WriterAdapterInterface } from "../disk-manager/writer-adapter.interface";
 
-export class Writer extends File {
+export class Writer extends File implements WriterAdapterInterface {
 
   protected lazy: number = 10000;
 
@@ -20,7 +21,7 @@ export class Writer extends File {
     this.activePoint++;
   }
 
-  async write(str: string) {
+  async write(str: string | Buffer) {
     await promisify(fs.write)(this.handler, str);
   }
 

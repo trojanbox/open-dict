@@ -1,9 +1,8 @@
-import {QueueInterface} from "./queue.interface";
+import { QueueInterface } from "./queue.interface";
 
 export type LoserTreeComparator<T> = (a: T, b: T) => boolean;
 
 export class LoserTree<T extends Object | number> {
-
   private queue: Array<QueueInterface> = [];
 
   private tree: number[] = null;
@@ -23,7 +22,6 @@ export class LoserTree<T extends Object | number> {
   }
 
   async bindDataSource(queue: Array<QueueInterface>) {
-
     this.queue = queue;
     let initValues: Array<T> = [];
     for (let i = 0; i < this.queue.length; i++) {
@@ -47,8 +45,14 @@ export class LoserTree<T extends Object | number> {
   private async adjust(currentCursor: number) {
     let fatherCursor: number = Math.floor((currentCursor + this.size) / 2);
     while (fatherCursor > 0) {
-      if (currentCursor >= 0 && (this.tree[fatherCursor] === LoserTree.MIN_KEY
-        || this.comparator(this.leaves[currentCursor], this.leaves[this.tree[fatherCursor]]))) {
+      if (
+        currentCursor >= 0 &&
+        (this.tree[fatherCursor] === LoserTree.MIN_KEY ||
+          this.comparator(
+            this.leaves[currentCursor],
+            this.leaves[this.tree[fatherCursor]]
+          ))
+      ) {
         let temp: number = currentCursor;
         currentCursor = this.tree[fatherCursor];
         this.tree[fatherCursor] = temp;
@@ -108,7 +112,10 @@ export class LoserTree<T extends Object | number> {
     }
   }
 
-  public async getItemList(callable: (list: Array<T>) => void, limit = 1000): Promise<LoserTree<T>> {
+  public async getItemList(
+    callable: (list: Array<T>) => void,
+    limit = 1000
+  ): Promise<LoserTree<T>> {
     let list: Array<T> = [];
     let offset: number = 1;
     while (true) {

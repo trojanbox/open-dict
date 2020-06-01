@@ -108,7 +108,7 @@
 
 * [Bumped Version] 6.2.0 ([8838e0e](https://github.com/maximegris/angular-electron/commit/8838e0e))
 * Maj Changelog ([bc4c950](https://github.com/maximegris/angular-electron/commit/bc4c950))
-* misc/ add Stale to close unactive issues ([398bdf1](https://github.com/maximegris/angular-electron/commit/398bdf1))
+* misc/ add Stale to done unactive issues ([398bdf1](https://github.com/maximegris/angular-electron/commit/398bdf1))
 * Upgrade Angular 8.2.8 & Electron 6.0.10 ([2ecda63](https://github.com/maximegris/angular-electron/commit/2ecda63))
 
 

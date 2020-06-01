@@ -1,5 +1,4 @@
-export class DiskSpaceManager {
-
+export class SpaceManager {
   protected size: number = 0;
 
   protected byteLength: number = 0;
@@ -25,6 +24,4 @@ export class DiskSpaceManager {
   public getByteLength() {
     return this.byteLength;
   }
-
-
 }

@@ -1,10 +1,10 @@
-import {Reader} from "./reader";
-import {promisify} from "util";
+import { ResourceReader } from "../disk-manager/reader";
+import { promisify } from "util";
 import * as fs from "fs";
-import {Item} from "./file";
-import {QueueInterface} from "./queue.interface";
+import { Item, File } from "../disk-manager/disk-manager";
+import { QueueInterface } from "./queue.interface";
 
-export class QueueReader extends Reader implements QueueInterface {
+export class QueueReader extends File implements QueueInterface {
 
   private sortQueue: Item[] = [];
 
@@ -14,10 +14,10 @@ export class QueueReader extends Reader implements QueueInterface {
 
   private cursor: number = 0;
 
-  private strFragment: string = '';
+  private strFragment: string = "";
 
   public async poll() {
-    if (await this.cursorNullPoint() && !await this.readAhead()) {
+    if ((await this.cursorNullPoint()) && !(await this.readAhead())) {
       return undefined;
     }
     return this.sortQueue[this.cursor++];
@@ -29,10 +29,16 @@ export class QueueReader extends Reader implements QueueInterface {
 
   private async readAhead() {
     let buffer: Buffer = Buffer.alloc(this.sqBufferLength);
-    let readResult = await promisify(fs.read)(this.handler, buffer, 0, this.sqBufferLength, this.sqPosition);
+    let readResult = await promisify(fs.read)(
+      this.handler,
+      buffer,
+      0,
+      this.sqBufferLength,
+      this.sqPosition
+    );
     let newBuffer = readResult.buffer.slice(0, readResult.bytesRead);
     if (newBuffer.byteLength <= 0) return false;
-    let encode = newBuffer.toString('utf-8');
+    let encode = newBuffer.toString("utf-8");
     await this.buildSortQueue((this.strFragment + encode).split("\n"));
     this.sqPosition += this.sqBufferLength;
     this.cursor = 0;
