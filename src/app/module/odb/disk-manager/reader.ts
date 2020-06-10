@@ -1,7 +1,7 @@
 import {
   File,
   FileReaderItemCallable,
-  Item,
+  Record,
   ItemRaw,
   ItemType,
 } from "./disk-manager";
@@ -50,8 +50,8 @@ export class ResourceReader extends File {
     }
   }
 
-  async getItemList(callable: (itemList: Array<Item>) => {}, counter = 100) {
-    let list: Array<Item> = [];
+  async getItemList(callable: (itemList: Array<Record>) => {}, counter = 100) {
+    let list: Array<Record> = [];
     let offset: number = 0;
     await this.getItem(async (item) => {
       if (offset >= counter) {

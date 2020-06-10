@@ -1,11 +1,12 @@
-import { SpaceManager } from "../disk-manager/space-manager";
-import { Writer } from "../disk-manager/writer";
-import { DataPage } from "./data-page";
-import { IndexedManager } from "./indexed-manager";
-import { Item } from "../disk-manager/disk-manager";
-import { UserRecord } from "./user-record";
+import {SpaceManager} from "../disk-manager/space-manager";
+import {Writer} from "../disk-manager/writer";
+import {DataPage} from "./data-page";
+import {IndexedManager} from "./indexed-manager";
+import {Record} from "../disk-manager/disk-manager";
+import {UserRecord} from "./user-record";
+import {DirectoryRecord} from "./directory-record";
 
-export class PageManager<T extends Item> extends SpaceManager {
+export class PageManager<T extends Record> extends SpaceManager {
 
   protected indexedManager: IndexedManager<T>;
 
@@ -23,18 +24,19 @@ export class PageManager<T extends Item> extends SpaceManager {
 
   constructor() {
     super();
-    this.writer = new Writer({ mode: "w" });
+    this.writer = new Writer({mode: "w"});
     this.createDataPage();
   }
 
   public async createDataPage() {
     this.pageNo++;
-    console.log('正在申请 ' + this.pageNo + ' 页的空间。');
     let page = new DataPage();
     await page.setPageNo(this.pageNo);
     await page.setUserRecordManager(new UserRecord())
+    await page.setDirectoryRecordManager(new DirectoryRecord())
     await page.setPageManager(this);
     this.activeDataPage = page;
+    this.dataPageList.push(this.activeDataPage);
     return page;
   }
 
@@ -74,12 +76,10 @@ export class PageManager<T extends Item> extends SpaceManager {
   public async write(type: Symbol) {
     switch (type) {
       case PageManager.SIGNAL_CREATE_DATA_SPACE:
-        this.dataPageList.push(this.activeDataPage);
         if (this.dataPageList.length <= 1) {
           this.getActiveDataPage().setPrevPageNo(0);
           return false;
         }
-        console.log('正在写入第 ' + this.dataPageList[0].getCurrentPageNo() + ' 页的数据，当前队列长度 ' + this.dataPageList.length + '。')
         this.getActiveDataPage().setPrevPageNo(this.dataPageList[0].getCurrentPageNo());
         this.dataPageList[0].setNextPageNo(this.getActiveDataPage().getCurrentPageNo());
         if (this.dataPageList.length >= 2) {

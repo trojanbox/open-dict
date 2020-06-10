@@ -4,9 +4,9 @@ import { PageManager } from "./page-manager";
 import { Writer } from "../disk-manager/writer";
 import { OdbFileSystem } from "../odb-file-system";
 import { OdbBuilder } from "../odb-builder";
-import { Item } from "../disk-manager/disk-manager";
+import { Record } from "../disk-manager/disk-manager";
 
-export class IndexedManager<T extends Item> implements IndexedAdapterInterface {
+export class IndexedManager<T extends Record> implements IndexedAdapterInterface {
 
   private pageManager: PageManager<T>;
 

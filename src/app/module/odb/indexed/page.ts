@@ -4,11 +4,11 @@ import {CustomParamSpacePage} from "../structure/custom-param-space.page";
 import {SpaceManager} from "../disk-manager/space-manager";
 import {PageHeader} from "./page-header";
 import {PageManager} from "./page-manager";
-import {Item} from "../disk-manager/disk-manager";
+import {Record} from "../disk-manager/disk-manager";
 
-export abstract class Page<T extends Item> extends SpaceManager {
+export abstract class Page<T extends Record> extends SpaceManager {
 
-  protected pageSize: number = (2 << 13) * 8;
+  protected pageSize: number = 2 << 13;
 
   protected pageContents: Buffer = Buffer.alloc(2 << 13);
 
@@ -51,8 +51,10 @@ export abstract class Page<T extends Item> extends SpaceManager {
    * @param buffer
    */
   public fill(buffer: Buffer) {
-    this.pageContents.fill(buffer, this.cursor);
+    console.log('page cursor', this.cursor, this.pageContents);
+    this.pageContents.fill(buffer, this.cursor, buffer.byteLength + this.cursor);
     this.cursor += buffer.byteLength;
+    console.log('page cursor', this.cursor, this.pageContents);
     return this;
   }
 

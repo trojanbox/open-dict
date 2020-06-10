@@ -1,13 +1,13 @@
-import { ResourceReader } from "./disk-manager/reader";
-import { Writer } from "./disk-manager/writer";
-import { QuickSort } from "./structure/quick-sort.struct";
-import { Item } from "./disk-manager/disk-manager";
-import { join } from "path";
-import { QueueReader } from "./structure/queue-reader";
-import { LoserTree } from "./structure/loser-tree";
-import { OdbFileSystem } from "./odb-file-system";
+import {ResourceReader} from "./disk-manager/reader";
+import {Writer} from "./disk-manager/writer";
+import {QuickSort} from "./structure/quick-sort.struct";
+import {Record} from "./disk-manager/disk-manager";
+import {join} from "path";
+import {QueueReader} from "./structure/queue-reader";
+import {LoserTree} from "./structure/loser-tree";
+import {OdbFileSystem} from "./odb-file-system";
 
-export class OdbBuilder<T extends Item> extends OdbFileSystem {
+export class OdbBuilder<T extends Record> extends OdbFileSystem {
   /**
    * 临时目录
    */
@@ -50,14 +50,12 @@ export class OdbBuilder<T extends Item> extends OdbFileSystem {
    * 切割文件到临时目录
    */
   protected async splitFile() {
-    const reader = new ResourceReader({ mode: "r" });
+    const reader = new ResourceReader({mode: "r"});
     await reader.open(this.inputFile);
     await reader.getItemList(async (list) => {
-      const sort = new QuickSort<Item>((a, b) => a.keyword < b.keyword).sort(
-        list
-      );
+      const sort = new QuickSort<Record>((a, b) => a.keyword < b.keyword).sort(list);
       let fileFullName = join(this.tmpDir, Math.random() * 1e20 + ".odb.tmp");
-      let writer = new Writer({ mode: "w" });
+      let writer = new Writer({mode: "w"});
       this.mergeFileList.push(fileFullName);
       await writer.open(fileFullName);
       for (const item of sort) {
@@ -75,16 +73,12 @@ export class OdbBuilder<T extends Item> extends OdbFileSystem {
     let totalReaders: QueueReader[] = [];
     for (let i in this.mergeFileList) {
       if (this.mergeFileList.hasOwnProperty(i)) {
-        totalReaders.push(
-          await new QueueReader({ mode: "r+" }).open(this.mergeFileList[i])
-        );
+        totalReaders.push(await new QueueReader({mode: "r+"}).open(this.mergeFileList[i]));
       }
     }
-    let writer = new Writer({ mode: "w" });
+    let writer = new Writer({mode: "w"});
     await writer.open(this.outputFile);
-    let lt = await new LoserTree<Item>(
-      (a, b) => a.keyword > b.keyword
-    );
+    let lt = await new LoserTree<Record>((a, b) => a.keyword > b.keyword);
     await lt.bindDataSource(totalReaders);
     await lt.getItem(async (item: T) => await this.itemHandler(item));
     await this.indexedAdapter.done();
@@ -96,7 +90,6 @@ export class OdbBuilder<T extends Item> extends OdbFileSystem {
     await this.dataDepositoryAdapter.writeString(item.content);
     let address: number = this.dataDepositoryAdapter.getLastRecordCursor();
     await this.indexedAdapter.addRecord(item.keyword, address);
-    // console.log(item.keyword, address);
   }
 
   public async build() {
@@ -105,5 +98,6 @@ export class OdbBuilder<T extends Item> extends OdbFileSystem {
     return this;
   }
 
-  protected pack() {}
+  protected pack() {
+  }
 }

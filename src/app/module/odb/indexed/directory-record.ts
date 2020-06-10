@@ -1,7 +1,7 @@
 import { address2block } from "../../utils/disk-address";
 import { SpaceManager } from "../disk-manager/space-manager";
 
-export class UserRecord extends SpaceManager {
+export class DirectoryRecord extends SpaceManager {
 
   protected keyword: Buffer;
 

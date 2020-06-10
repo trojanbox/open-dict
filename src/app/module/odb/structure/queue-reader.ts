@@ -1,12 +1,12 @@
 import { ResourceReader } from "../disk-manager/reader";
 import { promisify } from "util";
 import * as fs from "fs";
-import { Item, File } from "../disk-manager/disk-manager";
+import { Record, File } from "../disk-manager/disk-manager";
 import { QueueInterface } from "./queue.interface";
 
 export class QueueReader extends File implements QueueInterface {
 
-  private sortQueue: Item[] = [];
+  private sortQueue: Record[] = [];
 
   private sqBufferLength: number = 1 << 14;
 

@@ -4,11 +4,11 @@ import * as zlib from "zlib";
 import { FileOperationInterface } from "../disk-manager/file-operation.interface";
 import { DataDepositoryAdapterInterface } from "../data-depository-adapter.interface";
 import { OdbBuilder } from "../odb-builder";
-import { Item } from "../disk-manager/disk-manager";
+import { Record } from "../disk-manager/disk-manager";
 import { OdbFileSystem } from "../odb-file-system";
 import { Writer } from "../disk-manager/writer";
 
-export class DataDepositoryManager<T extends Item> extends SpaceManager
+export class DataDepositoryManager<T extends Record> extends SpaceManager
   implements DataDepositoryAdapterInterface {
   private builder: OdbFileSystem;
 
@@ -26,7 +26,7 @@ export class DataDepositoryManager<T extends Item> extends SpaceManager
     this.writer.open("D:\\test\\data.odb.res");
   }
 
-  public setBuilder<T extends Item>(builder: OdbBuilder<T>) {
+  public setBuilder<T extends Record>(builder: OdbBuilder<T>) {
     this.builder = builder;
     return this;
   }

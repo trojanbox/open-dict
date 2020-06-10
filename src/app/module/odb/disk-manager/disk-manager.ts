@@ -3,16 +3,16 @@ import { promisify } from "util";
 import { FileOptions } from "./file-options";
 
 export type FileReaderItemCallable = (
-  item: Item,
+  item: Record,
   counter: number,
   group: number
 ) => {};
 
-export type Item = { keyword: string; content: string };
+export type Record = { keyword: string; content: string };
 
 export type ItemExtInf = {};
 
-export type ItemRaw = { type: Symbol; decode: Item; raw: Buffer };
+export type ItemRaw = { type: Symbol; decode: Record; raw: Buffer };
 
 export const ItemType = {
   SEGMENT: Symbol("ITEM_SEGMENT"),
