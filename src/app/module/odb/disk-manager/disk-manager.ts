@@ -3,9 +3,9 @@ import { promisify } from "util";
 import { FileOptions } from "./file-options";
 
 export type FileReaderItemCallable = (
-  item: Record,
-  counter: number,
-  group: number
+    item: Record,
+    counter: number,
+    group: number
 ) => {};
 
 export type Record = { keyword: string; content: string };
@@ -15,35 +15,59 @@ export type ItemExtInf = {};
 export type ItemRaw = { type: Symbol; decode: Record; raw: Buffer };
 
 export const ItemType = {
-  SEGMENT: Symbol("ITEM_SEGMENT"),
-  FRAGMENT: Symbol("ITEM_FRAGMENT"),
+    SEGMENT: Symbol("ITEM_SEGMENT"),
+    FRAGMENT: Symbol("ITEM_FRAGMENT"),
 };
 
+/**
+ * 文件操作
+ */
 export abstract class File {
-  protected options: FileOptions;
 
-  protected handler: number = 0;
+    /**
+     * 文件操作描述
+     */
+    protected options: FileOptions;
 
-  constructor(options: FileOptions = undefined) {
-    this.options = options ?? { mode: "r" };
-  }
+    /**
+     * 操作句柄
+     */
+    protected handler: number = 0;
 
-  public async getFd(): Promise<number> {
-    return this.handler;
-  }
+    constructor(options: FileOptions = undefined) {
+        this.options = options ?? { mode: "r" };
+    }
 
-  public async open(path: string) {
-    this.handler = await promisify(fs.open)(path, this.options.mode);
-    return this;
-  }
+    /**
+     * 获取文件描述符
+     */
+    public async getFd(): Promise<number> {
+        return this.handler;
+    }
 
-  public async bindFd(fd: number) {
-    this.handler = fd;
-    return this;
-  }
+    /**
+     * 打开一个文件
+     * @param path
+     */
+    public async open(path: string) {
+        this.handler = await promisify(fs.open)(path, this.options.mode);
+        return this;
+    }
 
-  public async close() {
-    await promisify(fs.close)(this.handler);
-    return false;
-  }
+    /**
+     * 绑定文件描述符
+     * @param fd
+     */
+    public async bindFd(fd: number) {
+        this.handler = fd;
+        return this;
+    }
+
+    /**
+     * 关闭文件
+     */
+    public async close() {
+        await promisify(fs.close)(this.handler);
+        return false;
+    }
 }

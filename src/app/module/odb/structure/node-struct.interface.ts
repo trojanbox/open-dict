@@ -1,9 +1,9 @@
 export interface NodeStructInterface {
 
-  insert(): void;
+    insert(): void;
 
-  search(): void;
+    search(): void;
 
-  split(): void;
+    split(): void;
 
 }

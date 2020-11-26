@@ -1,4 +1,14 @@
 export interface IndexedAdapterInterface {
-  addRecord(keyword: string, address: number);
-  done();
+
+    /**
+     * 添加记录
+     * @param keyword
+     * @param address
+     */
+    addRecord(keyword: string, address: number);
+
+    /**
+     * 完成
+     */
+    done();
 }
